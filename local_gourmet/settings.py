@@ -43,9 +43,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    'django_seed',
+    # Third Party
     'rest_framework',
-
+    # local Apps
     'reviews',
     'accounts',
     'stores',
