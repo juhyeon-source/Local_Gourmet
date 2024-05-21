@@ -1,29 +1,18 @@
-from rest_framework.serializers import ModelSerializer
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
+
+User = get_user_model()
 
 
-class AccountSerializer(ModelSerializer):
+class SignupSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    def create(self, validated_data):
+        user = User.objects.create(username=validated_data["username"])
+        user.set_password(validated_data["password"])
+        user.save()
+        return user
+
     class Meta:
-        '''
-        error_messages = None
-        '''
-        model = get_user_model()
-        fields = [
-            "id",
-            "username",
-            "password",
-            "email",
-            "address",
-            "created",
-        ]
-
-        error_message = {
-            "password":
-                {"same_password": "변경하려는 비밀번호는 이전 비밀번호와 다르게 지정해야 합니다."}
-
-        }
-
-    def validate_password(self, password):
-        len_password = len(password)
-        err_msg = self.Meta.error_messages.get("password")
-        return password
+        model = User
+        fields = ["pk", "username", "password"]
