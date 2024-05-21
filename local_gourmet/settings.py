@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django_seed',
     # Third Party
     'rest_framework',
+    'corsheaders',
     # local Apps
     'reviews',
     'accounts',
@@ -71,7 +72,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
+
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000', 'http://127.0.0.1:3000'
+]
+
+# CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'local_gourmet.urls'
 
