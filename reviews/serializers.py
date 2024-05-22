@@ -7,8 +7,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = (
             'id',
-            'store_id',
-            'user_id',
+            'store',
+            'user',
             'username',
             'store_name',
             'created_at',
@@ -22,8 +22,8 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = (
             'id',
-            'review_id',
-            'user_id',
+            'review',
+            'user',
             'created_at',
             'updated_at',
         )

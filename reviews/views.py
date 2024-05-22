@@ -5,13 +5,23 @@ from .models import Review, Comment
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
+
+
+# 주소 인증은 잠시 빼두고 진행! 아직 할 수 있는 게 없다 ..
+# 이미지 업로드 조건 : 메뉴판 사진, 주문한 음식 사진
+# 이거는 .. 이미지 인식을 하기엔 빡세니깐 그냥 프론트에서 적어만 놓을까?
+# generic으로 한 번 해보기
 
 class ReviewListView(APIView):
 
     def get(self, request):
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
         reviews = Review.objects.all()
-        serializer = ReviewSerializer(reviews, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        result_page = paginator.paginate_queryset(reviews, request)
+        serializer = ReviewSerializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data, status=status.HTTP_200_OK)
 
 
     def post(self, request):
@@ -32,7 +42,7 @@ class ReviewDetailView(APIView):
         serializer = ReviewSerializer(review)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+# 수정은 기한 딱 하루만 하게 해야함.
     def put(self, request, review_id):
         self.permission_classes = [IsAuthenticated]
         self.check_permissions(request)
@@ -47,7 +57,7 @@ class ReviewDetailView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+# 프론트딴에서 정말 삭제하시겠냐고 팝업창 띄우기
     def delete(self, request, review_id):
         self.permission_classes = [IsAuthenticated]
         self.check_permissions(request)
