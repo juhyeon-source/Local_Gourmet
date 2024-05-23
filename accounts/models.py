@@ -25,6 +25,10 @@ class Accounts(AbstractUser):
         max_length=13,
         blank=True,
         validators=[RegexValidator(r"010-?\d{4}-?\d{4}$")],
+        #RegexValidator을 활용해, 정규 표현식으로 나타냄
+        #한국 휴대폰 번호는 무조건 010으로 시작하기 때문에 고정해둠
+        #가운데, 뒷 번호의 갯수를 네개로 제한\
+        #하이픈 포함 총 13자리
     )
     profile_picture = models.ImageField(
         upload_to="accounts/profile_picture/%Y/%m/%d",
