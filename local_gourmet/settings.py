@@ -38,18 +38,21 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "rest_framework",
-    "rest_framework_simplejwt",
-    "reviews",
-    "accounts",
-    "stores",
-    "chatbots",
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django_seed',
+    # Third Party
+    'rest_framework',
+    'corsheaders',
+    # local Apps
+    'reviews',
+    'accounts',
+    'stores',
+    'chatbots',
 ]
 
 AUTH_USER_MODEL = "accounts.Accounts"
@@ -63,16 +66,24 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
-ROOT_URLCONF = "local_gourmet.urls"
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000', 'http://127.0.0.1:3000'
+]
+
+# CORS_ALLOW_ALL_ORIGINS = True
+
+ROOT_URLCONF = 'local_gourmet.urls'
 
 TEMPLATES = [
     {
@@ -147,4 +158,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MEDIA_URL = "/media/"   #맨 앞에 /를 사용하여 절대경로로 지정
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+

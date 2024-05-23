@@ -17,7 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from local_gourmet import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # path('home/', ),
     path('api/accounts/', include('accounts.urls')),
-]
+    # path('api/chatbots/', include('chatbots.urls')),
+    path('api/reviews/', include('reviews.urls')),
+    path('api/stores/', include('stores.urls')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
