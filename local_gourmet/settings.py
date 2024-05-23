@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import environ
 import os
 from pathlib import Path
+from . import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,6 +27,8 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # reading .env file
 environ.Env.read_env()
 SECRET_KEY = env('SECRET_KEY')
+OPENAI_API_KEY = config.OPENAI_API_KEY
+
 # SECURITY WARNING: keep the secret key used in production secret!
 
 # SECURITY WARNING: don't run with debug turned on in production!
