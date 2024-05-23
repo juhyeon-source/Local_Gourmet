@@ -7,112 +7,64 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 
+from rest_framework import generics
+from rest_framework.generics import get_object_or_404
 
-# 주소 인증은 잠시 빼두고 진행! 아직 할 수 있는 게 없다 ..
-# 이미지 업로드 조건 : 메뉴판 사진, 주문한 음식 사진
-# 이거는 .. 이미지 인식을 하기엔 빡세니깐 그냥 프론트에서 적어만 놓을까?
-# generic으로 한 번 해보기
+class ReviewListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
 
-class ReviewListView(APIView):
+## 바로 위 코드와 아래 코드는 같은 걸 뜻함.
 
-    def get(self, request):
-        paginator = PageNumberPagination()
-        paginator.page_size = 10
-        reviews = Review.objects.all()
-        result_page = paginator.paginate_queryset(reviews, request)
-        serializer = ReviewSerializer(result_page, many=True)
-        return paginator.get_paginated_response(serializer.data, status=status.HTTP_200_OK)
+# class ReviewListCreateAPIView(mixins.ListModelMixin, 
+#                             mixins.CreateModelMixin, 
+#                             generics.GenericAPIView):
+    
+#     queryset = Review.objects.all()
+#     serializer_class = ReviewSerializer
 
+#     def get(self, request):
+#         return self.list(request)
+    
+#     def post(self, request):
+#         return self.create(request)
 
-    def post(self, request):
-        self.permission_classes = [IsAuthenticated]
-        self.check_permissions(request)
-        serializer = ReviewSerializer(data=request.data)
+class ReviewDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
 
-        if serializer.is_valid(raise_exception=True):
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+# class ReviewRetrieveUpdateDestroyAPIView(mixins.RetrieveModelMixin,
+#                                         mixins.UpdateModelMixin,
+#                                         mixins.DestroyModelMixin,
+#                                         generics.GenericAPIView):
+    
+#     queryset = Review.objects.all()
+#     serializer_class = ReviewSerializer
 
+#     def get(self, request, pk):
+#         return self.retrieve(request, pk)
+    
+#     def put(self, request, pk):
+#         return self.update(request, pk)
+    
+#     def delete(self, request, pk):
+#         return self.destroy(request, pk)
 
+class CommentListAPIView(generics.ListAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
 
-class ReviewDetailView(APIView):
+class CommentCreateAPIView(generics.CreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
 
-    def get(self, request, review_id):
+    def perform_create(self, serializer):
+        review_id = self.kwargs.get("review_pk")
         review = get_object_or_404(Review, pk=review_id)
-        serializer = ReviewSerializer(review)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer.save(review=review)
 
-# 수정은 기한 딱 하루만 하게 해야함.
-    def put(self, request, review_id):
-        self.permission_classes = [IsAuthenticated]
-        self.check_permissions(request)
-        review = get_object_or_404(Review, pk=review_id)
+class CommentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
 
-        if request.user != review.user:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        
-        serializer = ReviewSerializer(review, data=request.data)
-
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-# 프론트딴에서 정말 삭제하시겠냐고 팝업창 띄우기
-    def delete(self, request, review_id):
-        self.permission_classes = [IsAuthenticated]
-        self.check_permissions(request)
-        review = get_object_or_404(Review, pk=review_id)
-
-        if request.user != review.user:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        
-        review.delete()
-        data = {"delete": f"Review({review_id}) is deleted."}
-        return Response(data, status=status.HTTP_204_NO_CONTENT)
-
-
-
-class CommentListView(APIView):
-
-    def get(self, request, review_id):
-        comments = Comment.objects.filter(review_id=review_id)
-        serializer = CommentSerializer(comments, many=True)
-        return Response(serializer.data, status = status.HTTP_200_OK)
-
-
-    def post(self, request, review_id):
-        self.permission_classes = [IsAuthenticated]
-        self.check_permissions(request)
-        serializer = CommentSerializer(data=request.data)
-
-        if serializer.is_valid(raise_exception=True):
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-
-class CommentDetailView(APIView):
-
-    def put(self, request, review_id, comment_id):
-        self.permission_classes = [IsAuthenticated]
-        self.check_permissions(request)
-        comment = get_object_or_404(Comment, pk=comment_id)
-        serializer = CommentSerializer(comment, data=request.data, partial=True)
-
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-    def delete(self, request, review_id, comment_id):
-        self.permission_classes = [IsAuthenticated]
-        self.check_permissions(request)
-        comment = get_object_or_404(Comment, pk=comment_id)
-
-        if request.user != comment.user:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        
-        comment.delete()
-        data = {"delete": f"Comment({comment_id}) is deleted."}
-        return Response(data, status=status.HTTP_204_NO_CONTENT)
 
