@@ -1,9 +1,9 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MinLengthValidator
+from django.core.validators import RegexValidator
 from django.db import models
 
 # Create your models here.
-''' 회원 가입시 필요한 정보 '''
+""" 회원 가입시 필요한 정보 """
 
 
 class Accounts(AbstractUser):
@@ -15,19 +15,21 @@ class Accounts(AbstractUser):
         max_length=1,
         blank=True,
         choices=GenderChoices.choices,
-        default=GenderChoices.FEMALE,
     )
-    address = models.CharField(unique=True,
-                               max_length=250,
-                               choices="",
-                               error_messages={
-                                   "unique": "이미 등록된 주소지 입니다."
-                               })
+    address = models.CharField(
+        max_length=250,
+    )
+    phone_number = models.CharField(
+        max_length=13,
+        blank=True,
+        validators=[RegexValidator(r"010-?\d{4}-?\d{4}$")],
+    )
+    profile_picture = models.ImageField(
+        upload_to="accounts/profile_picture/%Y/%m/%d",
+        blank=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    phone_number = models.CharField(unique=True,
-                                    max_length=15,
-                                    validators=[MinLengthValidator(13, "-포함 13자 이상 기입해주세요.")])
 
     class Meta:
         db_table: str = "Accounts"
