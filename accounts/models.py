@@ -16,7 +16,7 @@ class Accounts(AbstractUser):
         max_length=1,
         blank=True,
         choices=GenderChoices.choices,
-        default=GenderChoices.PRIVATE,
+        default=GenderChoices.PRIVATE,  #선택안함이 기본
     )
     address = models.CharField(
         max_length=250,
@@ -28,6 +28,8 @@ class Accounts(AbstractUser):
     )
     profile_picture = models.ImageField(
         upload_to="accounts/profile_picture/%Y/%m/%d",
+        #ImageField 사용시, pip install pillow 설치 필요
+        #문자열을 제외한 다른 형태의 파일을 이용하려면 settings.py내에 MEDIA_URL 및 MEDIA_ROOT 작성 필요
         blank=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)

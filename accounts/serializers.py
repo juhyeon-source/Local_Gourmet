@@ -14,9 +14,11 @@ class SignupSerializer(serializers.ModelSerializer):
             phone_number=validated_data["phone_number"],
             address=validated_data["address"],
             profile_picture=validated_data["profile_picture"],
-        )
+        )  #사용자에게 요청받은 데이터들을 의미
+
         user.set_password(validated_data["password"])
-        user.save()
+        #password는 암호화 되어야 하기 때문에, 다른것 들과는 다르게 set_password를 이용
+        user.save()  #User.objects.create으로 받아온 내용들을 저장
         return user
 
     class Meta:
@@ -30,3 +32,4 @@ class SignupSerializer(serializers.ModelSerializer):
             "address",
             "profile_picture",
         ]
+        #조건

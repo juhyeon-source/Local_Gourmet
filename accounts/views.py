@@ -12,7 +12,7 @@ class SignupView(CreateAPIView):
 
     model = get_user_model()
     serializer_class = SignupSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny]  #회원가입은 누구나 할 수 있기 때문에 AllowAny사용
 
 
 class AccountLogInView(APIView):
