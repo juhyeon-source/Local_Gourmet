@@ -10,11 +10,13 @@ class Accounts(AbstractUser):
     class GenderChoices(models.TextChoices):
         MALE = "M", "남성"
         FEMALE = "F", "여성"
+        PRIVATE = "-", "--"
 
     gender = models.CharField(
         max_length=1,
         blank=True,
         choices=GenderChoices.choices,
+        default=GenderChoices.PRIVATE,
     )
     address = models.CharField(
         max_length=250,
