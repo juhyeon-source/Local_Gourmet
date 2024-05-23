@@ -10,7 +10,7 @@ class Accounts(AbstractUser):
     class GenderChoices(models.TextChoices):
         MALE = "M", "남성"
         FEMALE = "F", "여성"
-        PRIVATE = "-", "비공개"
+        PRIVATE = "-", "선택안함"
 
     gender = models.CharField(
         max_length=1,
