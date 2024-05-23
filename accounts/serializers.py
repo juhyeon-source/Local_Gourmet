@@ -1,29 +1,35 @@
-from rest_framework.serializers import ModelSerializer
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
+
+User = get_user_model()
 
 
-class AccountSerializer(ModelSerializer):
+class SignupSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    def create(self, validated_data):
+        user = User.objects.create(
+            username=validated_data["username"],
+            gender=validated_data["gender"],
+            phone_number=validated_data["phone_number"],
+            address=validated_data["address"],
+            profile_picture=validated_data["profile_picture"],
+        )  #사용자에게 요청받은 데이터들을 의미
+
+        user.set_password(validated_data["password"])
+        #password는 암호화 되어야 하기 때문에, 다른것 들과는 다르게 set_password를 이용
+        user.save()  #User.objects.create으로 받아온 내용들을 저장
+        return user
+
     class Meta:
-        '''
-        error_messages = None
-        '''
-        model = get_user_model()
+        model = User
         fields = [
-            "id",
+            "pk",
             "username",
             "password",
-            "email",
+            "gender",
+            "phone_number",
             "address",
-            "created",
+            "profile_picture",
         ]
-
-        error_message = {
-            "password":
-                {"same_password": "변경하려는 비밀번호는 이전 비밀번호와 다르게 지정해야 합니다."}
-
-        }
-
-    def validate_password(self, password):
-        len_password = len(password)
-        err_msg = self.Meta.error_messages.get("password")
-        return password
+        #조건
