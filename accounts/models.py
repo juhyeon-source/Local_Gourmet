@@ -27,7 +27,8 @@ class Accounts(AbstractUser):
         validators=[RegexValidator(r"010-?\d{4}-?\d{4}$")],
         #RegexValidator을 활용해, 정규 표현식으로 나타냄
         #한국 휴대폰 번호는 무조건 010으로 시작하기 때문에 고정해둠
-        #가운데, 뒷 번호의 갯수를 네개로 제한\
+        #가운데, 뒷 번호의 갯수를 네개로 제한
+        #/를 한번만 사용하기위해 f가 아닌 r을 사용
         #하이픈 포함 총 13자리
     )
     profile_picture = models.ImageField(
