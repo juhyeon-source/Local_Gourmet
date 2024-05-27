@@ -1,14 +1,13 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.views import APIView
-from .serializers import ReviewSerializer, CommentSerializer
+from .serializers import (ReviewListSerializer, ReviewDetailSerializer, ReviewCreateSerializer, ReviewUpdateSerializer,
+                        CommentSerializer)
 from .models import Review, Comment
-from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 
 from rest_framework import generics
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+
 
 class Pagination(PageNumberPagination):
     page_size = 5
@@ -17,34 +16,34 @@ class Pagination(PageNumberPagination):
 
 
 class ReviewListAPIView(generics.ListAPIView):
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
+    queryset = ReviewListSerializer.get_optimized_queryset()
+    serializer_class = ReviewListSerializer
     pagination_class = Pagination
     permission_classes = [AllowAny]
 
 class ReviewCreateAPIView(generics.CreateAPIView):
     queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = ReviewCreateSerializer
+    permission_classes = [AllowAny] # 확인하려고 이렇게 해둠. 로그인 기능 구현되면 제대로 할 예정
 
 class ReviewDetailAPIView(generics.RetrieveAPIView):
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
+    queryset = ReviewDetailSerializer.get_optimized_queryset()
+    serializer_class = ReviewDetailSerializer
     permission_classes = [AllowAny]
 
 class ReviewUpdateAPIView(generics.UpdateAPIView):
     queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = ReviewUpdateSerializer
+    permission_classes = [AllowAny]
 
 class ReviewDestroyAPIView(generics.DestroyAPIView):
     queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = ReviewListSerializer
+    permission_classes = [AllowAny]
 
 
 class CommentListAPIView(generics.ListAPIView):
-    queryset = Comment.objects.all()
+    queryset = CommentSerializer.get_optimized_queryset()
     serializer_class = CommentSerializer
     pagination_class = Pagination
     permission_classes = [AllowAny]
@@ -52,7 +51,7 @@ class CommentListAPIView(generics.ListAPIView):
 class CommentCreateAPIView(generics.CreateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
         review_id = self.kwargs.get("review_pk")
@@ -67,7 +66,7 @@ class CommentDetailAPIView(generics.RetrieveAPIView):
 class CommentUpdateAPIView(generics.UpdateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [AllowAny]
 
 class CommentDestroyAPIView(generics.DestroyAPIView):
     queryset = Comment.objects.all()
