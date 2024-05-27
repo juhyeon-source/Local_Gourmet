@@ -43,7 +43,6 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-
     """ 회원가입 페이지"""
     # 이메일 중복 검증
     email = serializers.EmailField(
@@ -82,14 +81,13 @@ class LoginSerializer(TokenObtainPairSerializer):
             raise NotFound("사용자를 찾을 수 없습니다. 로그인 정보를 확인하세요.")  # 404 Not Found
 
         else:
-            # 기본 동작을 실행하고 반환된 데이터를 저장합니다.
+            # 기본 동작을 실행하고 반환된 데이터를 저장.
             data = super().validate(attrs)
             return data
 
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-
         # token['email'] = user.email
         token['username'] = user.username
         return token
