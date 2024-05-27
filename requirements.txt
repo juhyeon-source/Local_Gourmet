@@ -12,6 +12,8 @@ environ==1.0
 Faker==25.2.0
 numpy==1.26.4
 pandas==2.2.2
+numpy==1.26.4
+pandas==2.2.2
 mypy-extensions==1.0.0
 packaging==24.0
 pathspec==0.12.1
