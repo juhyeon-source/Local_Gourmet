@@ -3,9 +3,13 @@ from django.urls import reverse
 
 
 class StoreAddress(models.Model):
-    address = models.CharField(max_length=250)
-
-
+    address_si = models.CharField(max_length=10)
+    address_gu = models.CharField(max_length=10)
+    address_detail = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return f'{self.address_si} {self.address_gu} {self.address_detail}'
+    
 class Store(models.Model):
     CATEGORY_CHOICES = (
         ("Korean", "한식"),
@@ -19,9 +23,9 @@ class Store(models.Model):
     )
     store_name = models.CharField(max_length=100)
     category = models.CharField(max_length=10, choices=CATEGORY_CHOICES)
-    address = models.OneToOneField(StoreAddress, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=13)
+    address = models.OneToOneField(StoreAddress, on_delete=models.CASCADE)
 
-    # 'store_detail' View에 URL을 반환
+    # 'store_detail' Views에 URL을 반환
     def get_absolute_url(self):
         return reverse('store_detail', args=[str(self.id)])
