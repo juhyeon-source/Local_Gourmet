@@ -16,7 +16,9 @@ class Migration(migrations.Migration):
             name='StoreAddress',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('address', models.CharField(max_length=250)),
+                ('address_si', models.CharField(max_length=10)),
+                ('address_gu', models.CharField(max_length=10)),
+                ('address_detail', models.CharField(max_length=100)),
             ],
         ),
         migrations.CreateModel(
