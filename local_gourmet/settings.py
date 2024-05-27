@@ -161,7 +161,7 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
-MEDIA_URL = "/media/"
+MEDIA_URL = "/media/" #맨 앞에 /를 사용하여 절대경로로 지정
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Default primary key field type
@@ -169,7 +169,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-MEDIA_URL = "/media/"   #맨 앞에 /를 사용하여 절대경로로 지정
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
