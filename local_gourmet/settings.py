@@ -14,7 +14,6 @@ from datetime import timedelta
 import environ
 import os
 from pathlib import Path
-from . import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +26,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 # reading .env file
 environ.Env.read_env()
 SECRET_KEY = env('SECRET_KEY')
-OPENAI_API_KEY = config.OPENAI_API_KEY
+OPENAI_API_KEY = env('OPENAI_API_KEY')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 
@@ -35,7 +34,7 @@ OPENAI_API_KEY = config.OPENAI_API_KEY
 DEBUG = True
 
 # 모든 호스트에 대해 접근허용, 디버깅 중 혹시몰라 설정함.
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 # Application definition
 
