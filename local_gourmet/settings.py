@@ -34,7 +34,7 @@ OPENAI_API_KEY = env('OPENAI_API_KEY')
 DEBUG = True
 
 # 모든 호스트에 대해 접근허용, 디버깅 중 혹시몰라 설정함.
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 # Application definition
 
