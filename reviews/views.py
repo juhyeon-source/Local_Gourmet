@@ -56,6 +56,7 @@ class ReviewDestroyAPIView(generics.DestroyAPIView):
     permission_classes = [IsAuthenticated, IsAuthor]
 
 
+
 class CommentListAPIView(generics.ListAPIView):
     queryset = CommentSerializer.get_optimized_queryset()
     serializer_class = CommentSerializer
@@ -80,7 +81,9 @@ class CommentUpdateAPIView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated, IsAuthor]
 
 
+
 class CommentDestroyAPIView(generics.DestroyAPIView):
     queryset = CommentSerializer.get_optimized_queryset()
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated, IsAuthor]
+
