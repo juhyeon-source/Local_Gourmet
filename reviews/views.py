@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404
+
+from reviews.permissions import IsAuthor
 from .serializers import (ReviewListSerializer, ReviewDetailSerializer, ReviewCreateSerializer, ReviewUpdateSerializer,
-                        CommentSerializer)
+                          CommentSerializer)
 from .models import Review, Comment
 from rest_framework.pagination import PageNumberPagination
 
@@ -23,7 +25,7 @@ class ReviewListAPIView(generics.ListAPIView):
 
 
 class ReviewCreateAPIView(generics.CreateAPIView):
-    queryset = Review.objects.all()
+    queryset = ReviewCreateSerializer.get_optimized_queryset()
     serializer_class = ReviewCreateSerializer
     permission_classes = [IsAuthenticated]
 
@@ -49,9 +51,9 @@ class ReviewUpdateAPIView(generics.UpdateAPIView):
 
 
 class ReviewDestroyAPIView(generics.DestroyAPIView):
-    queryset = Review.objects.all()
+    queryset = ReviewListSerializer.get_optimized_queryset()
     serializer_class = ReviewListSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAuthor]
 
 
 class CommentListAPIView(generics.ListAPIView):
@@ -62,7 +64,7 @@ class CommentListAPIView(generics.ListAPIView):
 
 
 class CommentCreateAPIView(generics.CreateAPIView):
-    queryset = Comment.objects.all()
+    queryset = CommentSerializer.get_optimized_queryset()
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
 
@@ -73,12 +75,12 @@ class CommentCreateAPIView(generics.CreateAPIView):
 
 
 class CommentUpdateAPIView(generics.UpdateAPIView):
-    queryset = Comment.objects.all()
+    queryset = CommentSerializer.get_optimized_queryset()
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAuthor]
 
 
 class CommentDestroyAPIView(generics.DestroyAPIView):
-    queryset = Comment.objects.all()
+    queryset = CommentSerializer.get_optimized_queryset()
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAuthor]
