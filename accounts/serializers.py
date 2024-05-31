@@ -7,6 +7,8 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from accounts.models import Bookmark
+
 User = get_user_model()
 
 
@@ -20,17 +22,17 @@ class SignupSerializer(serializers.ModelSerializer):
             phone_number=validated_data["phone_number"],
             address=validated_data["address"],
             profile_picture=validated_data["profile_picture"],
-        )  #왼쪽 : models.py에 정의되어있는 값과 동일한 이름으로 작성필요
-        #오른쪽 : 사용자에게 요청받은 데이터들을 의미
+        )  # 왼쪽 : models.py에 정의되어있는 값과 동일한 이름으로 작성필요
+        # 오른쪽 : 사용자에게 요청받은 데이터들을 의미
 
         user.set_password(validated_data["password"])
-        #password는 암호화 되어야 하기 때문에, 다른것 들과는 다르게 set_password를 이용
-        user.save()  #User.objects.create으로 받아온 내용들을 저장
+        # password는 암호화 되어야 하기 때문에, 다른것 들과는 다르게 set_password를 이용
+        user.save()  # User.objects.create으로 받아온 내용들을 저장
         return user
 
     class Meta:
         model = User
-        #위에서 정의한 get_user_model()을 의미
+        # 위에서 정의한 get_user_model()을 의미
         fields = [
             "pk",
             "username",
@@ -43,22 +45,15 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """ 회원가입 페이지"""
-    # 이메일 중복 검증
-    email = serializers.EmailField(
-        required=True,
-        validators=[UniqueValidator]
-    )
+    """회원가입 페이지"""
 
-    username = serializers.CharField(
-        required=True,
-        validators=[UniqueValidator]
-    )
+    # 이메일 중복 검증
+    email = serializers.EmailField(required=True, validators=[UniqueValidator])
+
+    username = serializers.CharField(required=True, validators=[UniqueValidator])
 
     password = serializers.CharField(
-        write_only=True,
-        required=True,
-        validators=[validate_password]
+        write_only=True, required=True, validators=[validate_password]
     )
 
     class Meta:
@@ -77,8 +72,10 @@ class LoginSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         user = get_object_or_404(User, username=attrs[self.username_field])
 
-        if check_password(attrs['password'], user.password) == False:
-            raise NotFound("사용자를 찾을 수 없습니다. 로그인 정보를 확인하세요.")  # 404 Not Found
+        if check_password(attrs["password"], user.password) == False:
+            raise NotFound(
+                "사용자를 찾을 수 없습니다. 로그인 정보를 확인하세요."
+            )  # 404 Not Found
 
         else:
             # 기본 동작을 실행하고 반환된 데이터를 저장.
@@ -89,5 +86,17 @@ class LoginSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         # token['email'] = user.email
-        token['username'] = user.username
+        token["username"] = user.username
         return token
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["pk", "username"]
+
+
+class BookmarkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bookmark
+        fields = ["id", "Store", "created_at"]
