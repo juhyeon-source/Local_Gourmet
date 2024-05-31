@@ -19,7 +19,9 @@ class Accounts(AbstractUser):
         choices=GenderChoices.choices,
         default=GenderChoices.PRIVATE,  # 선택안함이 기본
     )
-    address = models.OneToOneField('StoreAddress', on_delete=models.CASCADE)
+    address_si = models.CharField(max_length=50)
+    address_gu = models.CharField(max_length=30, default='default_value')
+    address_detail = models.CharField(max_length=250)
 
     phone_number = models.CharField(
         max_length=13,
@@ -47,14 +49,6 @@ class Accounts(AbstractUser):
     class Meta:
         db_table: str = "Accounts"
 
-
-class StoreAddress(models.Model):
-    address_si = models.CharField(max_length=10)
-    address_gu = models.CharField(max_length=10)
-    address_detail = models.CharField(max_length=100)
-
-    def __str__(self):
-        return f'{self.address_si} {self.address_gu} {self.address_detail}'
 
 class Bookmark(models.Model):
     user = models.ForeignKey(

@@ -29,6 +29,13 @@ class ReviewCreateAPIView(generics.CreateAPIView):
     serializer_class = ReviewCreateSerializer
     permission_classes = [IsAuthenticated]
 
+'''
+ORM 이용해서 로직을 짜보자
+store address에서의 address_gu와 user address의 address_gu가 같아야 함.
+근데 나는 지금 review 모델의 입장에서 있으니깐 다 외래키를 가져와서 사용하는 것.
+그럼 serializer에서 작성하는 게 나을려나?
+'''
+
 
 class ReviewDetailAPIView(generics.RetrieveAPIView):
     queryset = ReviewDetailSerializer.get_optimized_queryset()
