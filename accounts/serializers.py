@@ -72,9 +72,9 @@ class LoginSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         user = get_object_or_404(User, username=attrs[self.username_field])
 
-        if check_password(attrs["password"], user.password) == False:
+        if not check_password(attrs["password"], user.password):
             raise NotFound(
-                "사용자를 찾을 수 없습니다. 로그인 정보를 확인하세요."
+                "사용자를 찾을 수 없습니다. 로그인 정보를 확인 해주세요."
             )  # 404 Not Found
 
         else:
@@ -84,8 +84,10 @@ class LoginSerializer(TokenObtainPairSerializer):
 
     @classmethod
     def get_token(cls, user):
+        #classmethod를 사용하려면 무조건 cls(class)를 작성해주어야 함
         token = super().get_token(user)
         # token['email'] = user.email
+        # 이메일 인증시 사용 예정
         token["username"] = user.username
         return token
 
@@ -93,10 +95,10 @@ class LoginSerializer(TokenObtainPairSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["pk", "username"]
+        fields = ["pk", "username", "gender", "phone_number", "address", "profile_picture"]
 
 
 class BookmarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bookmark
-        fields = ["id", "Store", "created_at"]
+        fields = ["id", "store", "created_at", "updated_at"]
