@@ -22,7 +22,7 @@ class SignupView(CreateAPIView):
 
     model = get_user_model()
     serializer_class = SignupSerializer
-    permission_classes = [AllowAny]  # 회원가입은 누구나 할 수 있기 때문에 AllowAny사용
+    permission_classes = [AllowAny]  # 회원가입은 누구나 할 수 있기 때문에 AllowAny 사용
 
 
 class UserDeleteAPIView(DestroyAPIView):
@@ -42,7 +42,7 @@ class UserDeleteAPIView(DestroyAPIView):
 class Profile(ListAPIView):
     model = get_user_model()
     serializer_class = ProfileSerializer
-    # FIXME: permission
+    # FIXME: permission 나중에 수정 예정
     permission_classes = [AllowAny]
 
 
