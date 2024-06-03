@@ -12,15 +12,16 @@ class StoreSerializer(serializers.ModelSerializer):
         model = Store
         fields = ['store_name', 'category']
 
+
 class UserSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(read_only=True)
     class Meta:
         model = User
         fields = ['username']
 
+
 class ReviewListSerializer(serializers.ModelSerializer):
     store = StoreSerializer()
-    username = UserSerializer(source='user_id')
+    username = serializers.CharField(source='user.username')
 
     class Meta:
         model = Review
@@ -28,59 +29,88 @@ class ReviewListSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_optimized_queryset():
-        return Review.objects.all().only('store', 'user', 'score').select_related('store', 'user')
-    
+        return Review.objects.all().only('id', 'store_id', 'user__username', 'score').select_related('store', 'user')
+
 
 class ReviewDetailSerializer(serializers.ModelSerializer):
     store = StoreSerializer()
-    username = UserSerializer(source='user_id')
+    username = serializers.CharField(source='user.username')
 
     class Meta:
         model = Review
-        fields = ['id', 'store', 'username', 'score', 'review_content', 'image', 'created_at', 'updated_at']
+        fields = ['id', 'store', 'username', 'score',
+                'review_content', 'image', 'created_at', 'updated_at']
 
     @staticmethod
     def get_optimized_queryset():
-        return Review.objects.all().only('store', 'user').select_related('store', 'user')
-    
+        return Review.objects.all().only('store', 'user__username').select_related('store', 'user')
 
-class StoreCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Store
-        fields = ['store_name', 'address']
 
 class ReviewCreateSerializer(serializers.ModelSerializer):
-    store = StoreCreateSerializer()
 
     class Meta:
         model = Review
-        fields = ['store', 'score', 'image', 'review_content']
+        fields = ['id', 'store', 'score', 'image', 'review_content']
+        read_only_fields = ['id','store']
 
     @staticmethod
     def get_optimized_queryset():
         return Review.objects.all().only('store', 'score').select_related('store')
-    
+
     def create(self, validated_data):
-        store_data = validated_data.pop('store')
+        store_name = self.initial_data.get('store')
         request = self.context.get('request')
         user = request.user
-        store = Store.objects.create(**store_data)
-        review = Review.objects.create(store=store, user=user, **validated_data)
+
+        # 유저가 존재하지 않는 경우
+        if not user:
+            raise serializers.ValidationError('로그인한 유저여야 합니다.')
+        
+        # 스토어 이름으로 스토어 찾기
+        store = Store.objects.filter(store_name=store_name).first()
+        if not store:
+            raise serializers.ValidationError('존재하지 않는 스토어입니다.')
+        
+        # 스토어의 address_gu와 user의 address_gu를 비교
+        if user.address_gu != store.address.address_gu:
+            raise serializers.ValidationError('유저와 스토어의 동네가 같지 않습니다.')
+
+        review = Review.objects.create(user=user, store=store, **validated_data)
         return review
-    
+
+# update와 partial_update의 차이는 'PUT' 요청과 'PATCH' 요청의 차이라고 생각할 수 있다.
 class ReviewUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ['image', 'review_content']
 
+    #instance는 업데이트할 모델 인스턴스
+    #validated_data는 유효성 검사를 통과한 데이터로, 업데이트할 값들을 포함함.
+    def update(self, instance, validated_data):
+        #validated_data 딕셔너리의 키-값 쌍에 대해 반복하면서, instance 객체의 해당 속성(attr)을 새로운 값(value)으로 설정함.
+        for attr, value in validated_data.items():
+            #setattr 함수는 객체의 속성을 동적으로 설정하는 데 사용됨.
+            setattr(instance, attr, value)
+        
+        instance.save()
+        return instance
+
+    def partial_update(self, instance, validated_data):
+        # partial_update는 self.update를 반환하는데 update는 인스턴스를 업데이트하고 저장하는 로직을 포함하고 있다.
+        return self.update(instance, validated_data)
+
 
 class CommentSerializer(serializers.ModelSerializer):
-    username = UserSerializer(source='user_id')
+    username = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
-        fields = ['id', 'username', 'comment_content' ,'created_at', 'updated_at']
+        fields = ['id', 'username', 'comment_content','created_at', 'updated_at']
+        
+    def get_username(self, obj):
+        return obj.user.username
 
     @staticmethod
     def get_optimized_queryset():
-        return Comment.objects.all().only('user').select_related('user')
+        return Comment.objects.all().only('user__username').select_related('user')
+
