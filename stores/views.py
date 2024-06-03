@@ -46,7 +46,7 @@ class StoreImportAPIView(APIView):
                 phone_number = row['phone_number']
                 address = row['address_id']
                 store = Store(store_name=store_name, category=category, phone_number=phone_number,
-                              address_id=address)
+                            address_id=address)
                 stores.append(store)
             Store.objects.bulk_create(stores)
             return Response({'status': True, 'message': 'Storedata imported successfully'}, status=status.HTTP_200_OK)
