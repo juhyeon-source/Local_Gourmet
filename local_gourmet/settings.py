@@ -34,7 +34,7 @@ OPENAI_API_KEY = env('OPENAI_API_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "3.38.191.229"
+    "3.38.191.229",
     "localhost",
     "127.0.0.1",
 ]
