@@ -20,7 +20,9 @@ class SignupSerializer(serializers.ModelSerializer):
             username=validated_data["username"],
             gender=validated_data["gender"],
             phone_number=validated_data["phone_number"],
-            address=validated_data["address"],
+            address_si=validated_data["address_si"],
+            address_gu=validated_data["address_gu"],
+            address_detail=validated_data["address_detail"],
             profile_picture=validated_data["profile_picture"],
         )  # 왼쪽 : models.py에 정의되어있는 값과 동일한 이름으로 작성필요
         # 오른쪽 : 사용자에게 요청받은 데이터들을 의미
@@ -39,7 +41,9 @@ class SignupSerializer(serializers.ModelSerializer):
             "password",
             "gender",
             "phone_number",
-            "address",
+            "address_si",
+            "address_gu",
+            "address_detail",
             "profile_picture",
         ]
 
