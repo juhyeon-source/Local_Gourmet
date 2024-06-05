@@ -23,18 +23,15 @@ class ReviewListAPIView(generics.ListAPIView):
     pagination_class = Pagination
     permission_classes = [AllowAny]
 
+    def get_queryset(self):
+        store_id = self.kwargs['pk']
+        return ReviewListSerializer.get_optimized_queryset().filter(store_id=store_id)
+
 
 class ReviewCreateAPIView(generics.CreateAPIView):
     queryset = ReviewCreateSerializer.get_optimized_queryset()
     serializer_class = ReviewCreateSerializer
     permission_classes = [IsAuthenticated]
-
-'''
-ORM 이용해서 로직을 짜보자
-store address에서의 address_gu와 user address의 address_gu가 같아야 함.
-근데 나는 지금 review 모델의 입장에서 있으니깐 다 외래키를 가져와서 사용하는 것.
-그럼 serializer에서 작성하는 게 나을려나?
-'''
 
 
 class ReviewDetailAPIView(generics.RetrieveAPIView):
@@ -63,7 +60,6 @@ class ReviewDestroyAPIView(generics.DestroyAPIView):
     permission_classes = [IsAuthenticated, IsAuthor]
 
 
-
 class CommentListAPIView(generics.ListAPIView):
     queryset = CommentSerializer.get_optimized_queryset()
     serializer_class = CommentSerializer
@@ -88,9 +84,7 @@ class CommentUpdateAPIView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated, IsAuthor]
 
 
-
 class CommentDestroyAPIView(generics.DestroyAPIView):
     queryset = CommentSerializer.get_optimized_queryset()
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated, IsAuthor]
-

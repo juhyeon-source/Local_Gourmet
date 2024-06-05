@@ -18,9 +18,12 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username']
 
+# 스토어 목록이 쭉 보이고, 그 중에서 스토어 하나를 골라서 누르면 스토어 디테일 페이지가 나옴.
+# 그 아래에, 해당 스토어의 리뷰 목록이 보이고 또 리뷰 하나를 클릭하면 리뷰 상세로 가게 됨.
+# 그때 리뷰 상세에서 그 리뷰에 해당하는 댓글들을 보여줌.
 
 class ReviewListSerializer(serializers.ModelSerializer):
-    store = StoreSerializer()
+    store = serializers.CharField(source='store.store_name')
     username = serializers.CharField(source='user.username')
 
     class Meta:
@@ -33,12 +36,12 @@ class ReviewListSerializer(serializers.ModelSerializer):
 
 
 class ReviewDetailSerializer(serializers.ModelSerializer):
-    store = StoreSerializer()
+    store = serializers.CharField(source='store.store_name')
     username = serializers.CharField(source='user.username')
 
     class Meta:
         model = Review
-        fields = ['id', 'store', 'username', 'score',
+        fields = ['id', 'store_id', 'store', 'username', 'score',
                 'review_content', 'image', 'created_at', 'updated_at']
 
     @staticmethod
