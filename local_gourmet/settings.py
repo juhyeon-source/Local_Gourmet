@@ -33,9 +33,8 @@ OPENAI_API_KEY = env('OPENAI_API_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# 모든 호스트에 대해 접근허용, 디버깅 중 혹시몰라 설정함.
 ALLOWED_HOSTS = [
-    "3.38.245.72"
+    "3.38.191.229"
     "localhost",
     "127.0.0.1",
 ]
