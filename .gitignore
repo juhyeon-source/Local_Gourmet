@@ -420,11 +420,9 @@ pyrightconfig.json
 
 # Docker
 **/Dockerfile
-**/docker-compose.yml
 **/docker-compose.override.yml
 **/docker-compose.*.yml
 .dockerignore
-docker-compose.yml
 docker-compose.override.yml
 docker-compose.*.yml
 
