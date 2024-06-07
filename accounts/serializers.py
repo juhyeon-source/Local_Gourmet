@@ -88,7 +88,7 @@ class LoginSerializer(TokenObtainPairSerializer):
 
     @classmethod
     def get_token(cls, user):
-        #classmethod를 사용하려면 무조건 cls(class)를 작성해주어야 함
+        # classmethod를 사용하려면 무조건 cls(class)를 작성해주어야 함
         token = super().get_token(user)
         # token['email'] = user.email
         # 이메일 인증시 사용 예정
@@ -99,10 +99,36 @@ class LoginSerializer(TokenObtainPairSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["pk", "username", "gender", "phone_number", "address", "profile_picture"]
+        fields = [
+            "pk",
+            "username",
+            "gender",
+            "phone_number",
+            "address",
+            "profile_picture",
+        ]
 
 
 class BookmarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bookmark
         fields = ["id", "store", "created_at", "updated_at"]
+
+
+class AccountsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            "username",
+            "first_name",
+            "last_name",
+            "gender",
+            "address_si",
+            "address_gu",
+            "address_detail",
+            "phone_number",
+            "profile_picture",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["created_at", "updated_at"]
