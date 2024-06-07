@@ -50,7 +50,7 @@ jobs:
           sudo apt-get update
           sudo apt-get -y upgrade
           cd /home/ubuntu/Local_Gourmet
-          git pull origin main
+          git pull origin dev
           docker compose up -d
           python manage.py makemigrations
           python manage.py migrate
