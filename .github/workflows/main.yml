@@ -36,16 +36,16 @@ jobs:
 
   cd:
     name: 'django_CD'
-    needs: ci # 위 ci 작업이 실행되고 나서 cd 작업이 실행되도록 설정. jobs는 병렬작업처리라서 이거 설정해야 차례대로 함.
-    runs-on: ubuntu-22.04 # 현재 EC2 OS로 사용중인 버전과 맞춤
+    needs: ci
+    runs-on: ubuntu-22.04
       
     steps:
     - name: EC2 ssh connection test
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.SSH_HOST }}			# 연결할 EC2 
-        username: ${{ secrets.SSH_USERNAME }}	# 사용자
-        key: ${{ secrets.SSH_PEM }}				# pem 파일 내용
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_PEM }}
         script: |
           sudo apt-get update
           sudo apt-get -y upgrade
