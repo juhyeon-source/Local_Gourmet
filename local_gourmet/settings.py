@@ -24,8 +24,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(DEBUG=(bool, True))
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
-# reading .env file
-environ.Env.read_env()
 SECRET_KEY = env("SECRET_KEY")
 OPENAI_API_KEY = env("OPENAI_API_KEY")
 
