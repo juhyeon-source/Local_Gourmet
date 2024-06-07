@@ -25,11 +25,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: create secrets file
+    - name: Create .env
+      shell: bash
+      env:
+        ENV_SECRET_ENV: ${{ secrets.SECRET_ENV }}
       run: |
-        touch .env
-        echo ${{ secrets.SECRET_ENV }} >> .env
-        cat .env
+          touch .env
+          echo SECRET_ENV="$ENV_SECRET_ENV" >> .env
+          cat .env
     - name: Run Tests
       run: |
         python manage.py test
