@@ -51,8 +51,8 @@ jobs:
           sudo apt-get -y upgrade
           cd /home/ubuntu/Local_Gourmet
           git pull origin dev
-          pip3 install -r requirements.txt
+          pip install -r requirements.txt
           docker compose up -d
-          python3 manage.py makemigrations
-          python3 manage.py migrate
+          python manage.py makemigrations
+          python manage.py migrate
           sudo systemctl restart gunicorn
