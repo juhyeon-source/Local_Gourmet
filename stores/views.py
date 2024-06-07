@@ -62,7 +62,7 @@ class AddressImportAPIView(APIView):
         try:
             data = request.FILES
             serializer = self.serializer_class(data=data)
-            
+            if not serializer.is_valid():
                 return Response({'status': False, 'message': 'Provide a valid file'}, status=status.HTTP_400_BAD_REQUEST)
             excel_file = data.get('file')
             df = pd.read_excel(excel_file, sheet_name=0)
