@@ -28,7 +28,7 @@ jobs:
     - name: create secrets file
       run: |
         touch .env
-        echo SECRET_ENV=${{ secrets.SECRET_ENV }} >> .env
+        echo ${{ secrets.SECRET_ENV }} >> .env
         cat .env
     - name: Run Tests
       run: |
