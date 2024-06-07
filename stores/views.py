@@ -13,10 +13,10 @@ class StoreListAPIView(APIView):
     def get(self, request):
         paginator = PageNumberPagination()
         paginator.page_size = 10 # 페이지당 아이템 수를 설정
-        # stores = Store.objects.all()
-        # result_page = paginator.paginate_queryset(stores, request)
-        # serializer = StoreListSerializer(
-        #     result_page, many=True, context={'request': request})
+        stores = Store.objects.all()
+        result_page = paginator.paginate_queryset(stores, request)
+        serializer = StoreListSerializer(
+            result_page, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
 
@@ -62,7 +62,7 @@ class AddressImportAPIView(APIView):
         try:
             data = request.FILES
             serializer = self.serializer_class(data=data)
-            if not serializer.is_valid():
+            
                 return Response({'status': False, 'message': 'Provide a valid file'}, status=status.HTTP_400_BAD_REQUEST)
             excel_file = data.get('file')
             df = pd.read_excel(excel_file, sheet_name=0)
