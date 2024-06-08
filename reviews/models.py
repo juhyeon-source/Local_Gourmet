@@ -19,7 +19,6 @@ class Review(models.Model):
     user = models.ForeignKey(Accounts, on_delete=models.CASCADE)
     review_content = models.TextField()
     score = models.CharField(max_length=5, choices = SCORE_CHOICES)
-    # category = models.ForeignKey(Category, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='reviews/image/%Y/%m/%d')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
