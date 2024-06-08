@@ -23,6 +23,10 @@ class ReviewListAPIView(generics.ListAPIView):
     pagination_class = Pagination
     permission_classes = [AllowAny]
 
+    def get_queryset(self):
+        store_id = self.kwargs['pk']
+        return ReviewListSerializer.get_optimized_queryset().filter(store_id=store_id)
+
 
 class ReviewCreateAPIView(generics.CreateAPIView):
     queryset = ReviewCreateSerializer.get_optimized_queryset()
@@ -56,7 +60,6 @@ class ReviewDestroyAPIView(generics.DestroyAPIView):
     permission_classes = [IsAuthenticated, IsAuthor]
 
 
-
 class CommentListAPIView(generics.ListAPIView):
     queryset = CommentSerializer.get_optimized_queryset()
     serializer_class = CommentSerializer
@@ -81,9 +84,7 @@ class CommentUpdateAPIView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated, IsAuthor]
 
 
-
 class CommentDestroyAPIView(generics.DestroyAPIView):
     queryset = CommentSerializer.get_optimized_queryset()
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated, IsAuthor]
-

@@ -14,7 +14,7 @@ class StoreListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Store
-        fields = ['id', 'store_name', 'url', ]
+        fields = ['id', 'store_name', 'url', 'image']
 
     def get_url(self, obj):
         request = self.context.get('request')

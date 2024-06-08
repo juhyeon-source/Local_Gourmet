@@ -1,0 +1,66 @@
+name: Django EC2 CI/CD
+
+on:
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
+
+jobs:
+  ci:
+    name: 'django_CI'
+    runs-on: ubuntu-22.04
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ['3.10']
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: create secrets file
+      run: |
+        touch .env
+        echo "SECRET_KEY='${{ secrets.SECRET_KEY }}'
+        DB_NAME='${{ secrets.DB_NAME }}'
+        DB_USER='${{ secrets.DB_USER }}'
+        DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+        DB_HOST='${{ secrets.DB_HOST }}'
+        DB_PORT='${{ secrets.DB_PORT }}'
+        OPENAI_API_KEY='${{ secrets.OPENAI_API_KEY }}'
+        KAKAO_REST_API_KEY='${{ secrets.KAKAO_REST_API_KEY }}'
+        SOCIAL_AUTH_GOOGLE_CLIENT_ID='${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_ID }}'" > .env
+        cat .env
+    - name: Run Tests
+      run: |
+        python manage.py test
+
+  cd:
+    name: 'django_CD'
+    needs: ci
+    runs-on: ubuntu-22.04
+      
+    steps:
+    - name: EC2 ssh connection test
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_PEM }}
+        script: |
+          sudo apt-get update
+          sudo apt-get -y upgrade
+          cd /home/ubuntu/Local_Gourmet
+          git pull origin dev
+          pip install -r requirements.txt
+          docker compose up -d
+          python manage.py makemigrations
+          python manage.py migrate
+          sudo systemctl restart gunicorn
