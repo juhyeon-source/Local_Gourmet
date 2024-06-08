@@ -8,8 +8,10 @@ from .views import (
     LoginView,
     BookmarkViewSet,
     UserDeleteAPIView,
-    KakaoLogin,
-    GithubLogin,
+    SocialUrlView,
+    KakaoLoginView,
+    GoogleLoginView,
+    AccountsDetailView,
 )
 
 router = DefaultRouter()
@@ -22,7 +24,9 @@ urlpatterns: list = [
     path("signup/", SignupView.as_view()),
     path("delete-account/", UserDeleteAPIView.as_view(), name="delete-account"),
     path("login/", LoginView.as_view(), name="Login_View"),
+    path("me/", AccountsDetailView.as_view(), name="accounts-detail"),
     path("api/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
-    path("kakao/login/", KakaoLogin.as_view(), name="kakao_login"),
-    path("github/login/", GithubLogin.as_view(), name="github_login"),
+    path("social/", SocialUrlView.as_view(), name="social_login"),
+    path("kakao/", KakaoLoginView.as_view(), name="kakao_login"),
+    path("google/", GoogleLoginView.as_view(), name="google_login"),
 ]

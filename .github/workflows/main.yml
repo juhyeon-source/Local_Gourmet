@@ -28,7 +28,15 @@ jobs:
     - name: create secrets file
       run: |
         touch .env
-        echo "SECRET_KEY='${{ secrets.SECRET_ENV }}'" > .env
+        echo "SECRET_KEY='${{ secrets.SECRET_KEY }}'
+        DB_NAME='${{ secrets.DB_NAME }}'
+        DB_USER='${{ secrets.DB_USER }}'
+        DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+        DB_HOST='${{ secrets.DB_HOST }}'
+        DB_PORT='${{ secrets.DB_PORT }}'
+        OPENAI_API_KEY='${{ secrets.OPENAI_API_KEY }}'
+        KAKAO_REST_API_KEY='${{ secrets.KAKAO_REST_API_KEY }}'
+        SOCIAL_AUTH_GOOGLE_CLIENT_ID='${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_ID }}'" > .env
         cat .env
     - name: Run Tests
       run: |
@@ -51,6 +59,7 @@ jobs:
           sudo apt-get -y upgrade
           cd /home/ubuntu/Local_Gourmet
           git pull origin dev
+          pip install -r requirements.txt
           docker compose up -d
           python manage.py makemigrations
           python manage.py migrate
