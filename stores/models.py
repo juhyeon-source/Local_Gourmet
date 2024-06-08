@@ -25,6 +25,7 @@ class Store(models.Model):
     category = models.CharField(max_length=10, choices=CATEGORY_CHOICES)
     phone_number = models.CharField(max_length=13)
     address = models.OneToOneField(StoreAddress, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='stores/image/%Y/%m/%d', blank=True)
 
     # 'store_detail' Views에 URL을 반환
     def get_absolute_url(self):

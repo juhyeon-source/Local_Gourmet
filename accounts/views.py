@@ -1,13 +1,22 @@
+import secrets
+
 import requests
 from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
-from rest_framework.generics import CreateAPIView, ListAPIView, DestroyAPIView
+from rest_framework.generics import (
+    CreateAPIView,
+    ListAPIView,
+    DestroyAPIView,
+    RetrieveUpdateAPIView,
+)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import viewsets, status
+
+from local_gourmet import settings
 
 # from allauth.socialaccount.providers.kakao import views as kakao_view
 
@@ -17,6 +26,8 @@ from .serializers import (
     LoginSerializer,
     ProfileSerializer,
     BookmarkSerializer,
+    UserSerializer,
+    AccountsSerializer,
 )
 
 User = get_user_model()
@@ -71,213 +82,199 @@ class BookmarkViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-# 소셜 로그인
+class AccountsDetailView(RetrieveUpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = AccountsSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
 
 
-class KakaoLogin(APIView):
+# BASE_URL = f"{settings.BASE_URL}"
+
+
+BASE_URL = "http://127.0.0.1:8000"  # 예시 BASE URL
+STATE = secrets.token_urlsafe(16)
+
+
+class SocialUrlView(APIView):
     def post(self, request):
-        client_id = KAKAO_REST_API_KEY
+        social = request.data.get("social", None)
+        if social is None:
+            return Response(
+                {"error": "소셜로그인이 아닙니다"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        elif social == "kakao":
+            url = (
+                "https://kauth.kakao.com/oauth/authorize?client_id="
+                + settings.KAKAO_REST_API_KEY
+                + "&redirect_uri="
+                + BASE_URL
+                + "&response_type=code&prompt=login"
+            )
+            return Response({"url": url}, status=status.HTTP_200_OK)
+        elif social == "google":
+            client_id = settings.SOCIAL_AUTH_GOOGLE_CLIENT_ID
+            redirect_uri = BASE_URL
+            url = f"https://accounts.google.com/o/oauth2/v2/auth?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code&scope=email%20profile"
+            return Response({"url": url}, status=status.HTTP_200_OK)
 
-        received_code = request.data.get("code")  # 받은 ?code='' 값
-        code_value = received_code.split("?code=")[-1]  # 코드 값만 추출
-        print(code_value)
 
-        kakao_token = requests.post(
+class KakaoLoginView(APIView):
+    def post(self, request):
+        code = request.data.get("code")
+        access_token = requests.post(
             "https://kauth.kakao.com/oauth/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             data={
                 "grant_type": "authorization_code",
-                "client_id": client_id,
-                "redirect_uri": f"{REDIRECT_URL}/redirect.html",
-                "code": code_value,
+                "client_id": settings.KAKAO_REST_API_KEY,
+                "redirect_uri": BASE_URL,
+                "code": code,
+                "client_secret": settings.KAKAO_REST_API_KEY,
             },
         )
-        print(kakao_token.json)  # access_token 발급 완료
 
-        access_token = kakao_token.json()["access_token"]
-        refresh_token = kakao_token.json()["refresh_token"]
+        if access_token.status_code != 200:
+            return Response(
+                {"status": "400", "error": "카카오 로그인 실패. 다시 시도해주세요."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        token_data = {"access": access_token, "refresh": refresh_token}
-        # access_token 으로 사용자 정보 가져오기
-        user_data = requests.get(
+        access_token = access_token.json().get("access_token")
+        user_data_request = requests.get(
             "https://kapi.kakao.com/v2/user/me",
-            headers={"Authorization": f"Bearer {access_token}"},
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
+            },
         )
-        # 이메일, 닉네임, 프로필 사진 가져오기
-        user_data = user_data.json()
+        user_datajson = user_data_request.json()
+        user_data = user_datajson["kakao_account"]
 
-        kakao_account = user_data.get("kakao_account")
-        user_email = kakao_account.get("email")
-        user_nickname = kakao_account.get("profile")["nickname"]
-        user_img = kakao_account.get("profile")["profile_image_url"]
+        email = user_data["email"]
+        nickname = user_data["profile"]["nickname"]
+
+        data = {
+            "email": email,
+            "password": "aaaa1111~",
+            "nickname": nickname,
+            "country": "",
+        }
 
         try:
-            # 기존에 가입된 유저나 소셜 로그인 유저가 존재하면 로그인
-            user = User.objects.get(email=user_email)
-            social_user = SocialAccount.objects.filter(uid=user_email).first()
-
-            # 동일한 이메일의 유저가 있지만, 소셜 계정이 아닐 때
-            if social_user is None:
-                return Response(
-                    {"error": "소셜 계정이 아닌 이미 존재하는 이메일입니다."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            # 소셜 계정이 카카오가 아닌 다른 소셜 계정으로 가입했을 때
-            if social_user.provider != "kakao":
-                return Response(
-                    {"error": "다른 소셜 계정으로 가입되어 있습니다."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            # 소셜 로그인 사용자의 경우
-            if social_user:
-                # 사용자의 비밀번호 없이 로그인 가능한 JWT 토큰 생성
-                print(social_user)
-                refresh = RefreshToken.for_user(user)
-                return Response(
-                    {
-                        "refresh": str(refresh),
-                        "access": str(refresh.access_token),
-                        "provider": social_user.provider,
-                        "is_admin": user.is_admin,
-                        "msg": "로그인 성공",
-                    },
-                    status=status.HTTP_200_OK,
-                )
-
-        except User.DoesNotExist:
-            # 기존에 가입된 유저가 없으면 유저 모델에 생성후 소셜어카운트에 포함시키는 로직
-            new_user = User.objects.create(
-                email=user_email,
-                nickname=user_nickname,
-                profile_img=user_img,
-            )
-
-            # 소셜 계정도 생성하고 포함시키기
-            SocialAccount.objects.create(
-                user_id=new_user.id,
-                uid=new_user.email,
-                provider="kakao",
-            )
-
-            # 새로운 사용자에 대한 JWT 토큰 생성
-            refresh = RefreshToken.for_user(new_user)
-
+            user = User.objects.get(email=email)
+            refresh = RefreshToken.for_user(user)
+            refresh["email"] = user.email
+            refresh["nickname"] = user.nickname
+            refresh["profile_img"] = user.profile_img.url
             return Response(
                 {
                     "refresh": str(refresh),
                     "access": str(refresh.access_token),
-                    "is_admin": user.is_admin,
-                    "msg": "회원가입 성공",
                 },
-                status=status.HTTP_201_CREATED,
+                status=status.HTTP_200_OK,
             )
+        except:
+            serializer = UserSerializer(data=data)
+
+            if serializer.is_valid():
+                serializer.save()
+                user = User.objects.get(email=email)
+                user.is_active = True
+                user.set_unusable_password()
+                user.save()
+                refresh = RefreshToken.for_user(user)
+                refresh["email"] = user.email
+                refresh["nickname"] = user.nickname
+                refresh["profile_img"] = user.profile_img.url
+                return Response(
+                    {
+                        "refresh": str(refresh),
+                        "access": str(refresh.access_token),
+                    },
+                    status=status.HTTP_200_OK,
+                )
 
 
-class GithubLogin(APIView):
+class GoogleLoginView(APIView):
     def post(self, request):
-        client_id = SOCIAL_AUTH_GITHUB_CLIENT_ID
-        client_secret = SOCIAL_AUTH_GITHUB_SECRET
+        code = request.data.get("code")
 
-        received_code = request.data.get("code")
-        code_value = received_code.split("?code=")[-1]
+        client_id = settings.SOCIAL_AUTH_GOOGLE_CLIENT_ID
+        client_secret = settings.SOCIAL_AUTH_GOOGLE_CLIENT_SECRET
+        redirect_uri = BASE_URL
 
-        """토큰"""
-        github_token = requests.post(
-            f"https://github.com/login/oauth/access_token",
-            headers={"Accept": "application/json"},
+        #  구글 API로 액세스 토큰 요청
+        access_token_request = requests.post(
+            "https://oauth2.googleapis.com/token",
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
             data={
+                "code": code,
                 "client_id": client_id,
                 "client_secret": client_secret,
-                "redirect_url": f"{REDIRECT_URL}/redirectGit.html",
-                "code": code_value,
+                "redirect_uri": redirect_uri,
+                "grant_type": "authorization_code",
+                "scope": "email profile",
             },
         )
 
-        access_token = github_token.json()["access_token"]
+        if access_token_request.status_code != 200:
+            return Response(
+                {"status": "400", "error": "구글 로그인 실패. 다시 시도해주세요."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        token_data = {"access": access_token, "auth": "github"}
+        access_token_json = access_token_request.json()
+        access_token = access_token_json.get("access_token")
 
-        """유저 데이터"""
-        user_data = requests.get(
-            "https://api.github.com/user",
-            headers={
-                "Authorization": f"Bearer {access_token}",
-                "Accept": "application/json",
-            },
+        # 구글 API로 사용자 정보 요청
+        user_data_request = requests.get(
+            "https://www.googleapis.com/oauth2/v1/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"},
         )
+        user_data_json = user_data_request.json()
 
-        user_data = user_data.json()
+        email = user_data_json.get("email")
+        nickname = user_data_json.get("name")
 
-        """유저 이메일"""
-        user_emails = requests.get(
-            "https://api.github.com/user/emails",
-            headers={
-                "Authorization": f"Bearer {access_token}",
-                "Accept": "application/json",
-            },
-        )
-        user_emails = user_emails.json()
-
+        data = {
+            "email": email,
+            "password": "aaaa1111~",
+            "nickname": nickname,
+            "country": "",
+        }
         try:
-            user = User.objects.get(email=user_emails[0]["email"])
-            print(user)
-            social_user = SocialAccount.objects.filter(
-                uid=user_emails[0]["email"]
-            ).first()
-
-            # if social_user:
-            #     refresh = RefreshToken.for_user(user)
-
-            #     return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "로그인 성공"}, status=status.HTTP_200_OK)
-
-            if social_user is None:
-                return Response(
-                    {"error": "소셜 계정이 아닌 이미 존재하는 이메일입니다."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            if social_user.provider != "github":
-                return Response(
-                    {"error": "다른 소셜 계정으로 가입되어 있습니다."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            if social_user:
-                refresh = RefreshToken.for_user(user)
-
-                return Response(
-                    {
-                        "refresh": str(refresh),
-                        "access": str(refresh.access_token),
-                        "provider": social_user.provider,
-                        "is_admin": user.is_admin,
-                        "msg": "로그인 성공",
-                    },
-                    status=status.HTTP_200_OK,
-                )
-
-        except User.DoesNotExist:
-            new_user = User.objects.create(
-                nickname=user_data.get("login"),
-                email=user_emails[0]["email"],
-                profile_img=user_data.get("avatar_url"),
-            )
-            SocialAccount.objects.create(
-                user_id=new_user.id,
-                uid=new_user.email,
-                provider="github",
-            )
-
-            refresh = RefreshToken.for_user(new_user)
-
+            user = User.objects.get(email=email)
+            refresh = RefreshToken.for_user(user)
+            refresh["email"] = user.email
+            refresh["nickname"] = user.nickname
+            refresh["profile_img"] = user.profile_img.url
             return Response(
                 {
                     "refresh": str(refresh),
                     "access": str(refresh.access_token),
-                    "is_admin": user.is_admin,
-                    "msg": "회원가입 성공",
                 },
-                status=status.HTTP_201_CREATED,
+                status=status.HTTP_200_OK,
             )
+        except:
+            serializer = UserSerializer(data=data)
+
+            if serializer.is_valid():
+                serializer.save()
+                user = User.objects.get(email=email)
+                user.is_active = True
+                user.set_unusable_password()
+                user.save()
+                refresh = RefreshToken.for_user(user)
+                refresh["email"] = user.email
+                refresh["nickname"] = user.nickname
+                refresh["profile_img"] = user.profile_img.url
+                return Response(
+                    {
+                        "refresh": str(refresh),
+                        "access": str(refresh.access_token),
+                    },
+                    status=status.HTTP_200_OK,
+                )
