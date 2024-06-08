@@ -12,7 +12,7 @@ import pandas as pd
 class StoreListAPIView(APIView):
     def get(self, request):
         paginator = PageNumberPagination()
-        paginator.page_size = 10 # 페이지당 아이템 수를 설정
+        paginator.page_size = 500 # 페이지당 아이템 수를 설정
         stores = Store.objects.all()
         result_page = paginator.paginate_queryset(stores, request)
         serializer = StoreListSerializer(
