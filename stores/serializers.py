@@ -1,5 +1,11 @@
 from rest_framework import serializers
-from .models import Store
+from .models import Store, StoreAddress
+
+
+class StoreAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StoreAddress
+        fields = ['address_si', 'address_gu', 'address_detail']
 
 
 class StoreListSerializer(serializers.ModelSerializer):
@@ -8,7 +14,7 @@ class StoreListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Store
-        fields = ['id', 'store_name', 'url', ]
+        fields = ['id', 'store_name', 'url', 'category', 'image']
 
     def get_url(self, obj):
         request = self.context.get('request')
@@ -16,9 +22,13 @@ class StoreListSerializer(serializers.ModelSerializer):
 
 
 class StoreDetailSerializer(serializers.ModelSerializer):
-    # StoreAddress 모델의 address 속성을 참조
-    address = serializers.CharField(source='address.address')
+    # StoreAddress의 Fields을 가져옴
+    address = StoreAddressSerializer()
 
     class Meta:
         model = Store
-        fields = ['id', 'store_name', 'category', 'phone_number', 'address', ]
+        fields = ['id', 'store_name', 'category', 'phone_number', 'address']
+
+
+class ImportSerializer(serializers.Serializer):
+    file = serializers.FileField()

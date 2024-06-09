@@ -1,108 +1,90 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.views import APIView
-from .serializers import ReviewSerializer, CommentSerializer
+
+from reviews.permissions import IsAuthor
+from .serializers import (ReviewListSerializer, ReviewDetailSerializer, ReviewCreateSerializer, ReviewUpdateSerializer,
+                          CommentSerializer)
 from .models import Review, Comment
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
 
-class ReviewListView(APIView):
-
-    def get(self, request):
-        reviews = Review.objects.all()
-        serializer = ReviewSerializer(reviews, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+from rest_framework import generics
+from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 
-    def post(self, request):
-        self.permission_classes = [IsAuthenticated]
-        self.check_permissions(request)
-        serializer = ReviewSerializer(data=request.data)
-
-        if serializer.is_valid(raise_exception=True):
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+class Pagination(PageNumberPagination):
+    page_size = 5
+    page_query_param = 'page_size'
+    max_page_size = 10000
 
 
+class ReviewListAPIView(generics.ListAPIView):
+    queryset = ReviewListSerializer.get_optimized_queryset()
+    serializer_class = ReviewListSerializer
+    pagination_class = Pagination
+    permission_classes = [AllowAny]
 
-class ReviewDetailView(APIView):
+    def get_queryset(self):
+        store_id = self.kwargs['pk']
+        return ReviewListSerializer.get_optimized_queryset().filter(store_id=store_id)
 
-    def get(self, request, review_id):
+
+class ReviewCreateAPIView(generics.CreateAPIView):
+    queryset = ReviewCreateSerializer.get_optimized_queryset()
+    serializer_class = ReviewCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class ReviewDetailAPIView(generics.RetrieveAPIView):
+    queryset = ReviewDetailSerializer.get_optimized_queryset()
+    serializer_class = ReviewDetailSerializer
+    permission_classes = [AllowAny]
+
+
+class ReviewUpdateAPIView(generics.UpdateAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewUpdateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer(self, *args, **kwargs):
+        kwargs['partial'] = True  # partial=True 설정
+        return super().get_serializer(*args, **kwargs)
+
+    def get_queryset(self):
+        user = self.request.user
+        return Review.objects.filter(user=user)
+
+
+class ReviewDestroyAPIView(generics.DestroyAPIView):
+    queryset = ReviewListSerializer.get_optimized_queryset()
+    serializer_class = ReviewListSerializer
+    permission_classes = [IsAuthenticated, IsAuthor]
+
+
+class CommentListAPIView(generics.ListAPIView):
+    queryset = CommentSerializer.get_optimized_queryset()
+    serializer_class = CommentSerializer
+    pagination_class = Pagination
+    permission_classes = [AllowAny]
+
+
+class CommentCreateAPIView(generics.CreateAPIView):
+    queryset = CommentSerializer.get_optimized_queryset()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        review_id = self.kwargs.get("review_pk")
         review = get_object_or_404(Review, pk=review_id)
-        serializer = ReviewSerializer(review)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer.save(review=review, user=self.request.user)
 
 
-    def put(self, request, review_id):
-        self.permission_classes = [IsAuthenticated]
-        self.check_permissions(request)
-        review = get_object_or_404(Review, pk=review_id)
-
-        if request.user != review.user:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        
-        serializer = ReviewSerializer(review, data=request.data)
-
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+class CommentUpdateAPIView(generics.UpdateAPIView):
+    queryset = CommentSerializer.get_optimized_queryset()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsAuthor]
 
 
-    def delete(self, request, review_id):
-        self.permission_classes = [IsAuthenticated]
-        self.check_permissions(request)
-        review = get_object_or_404(Review, pk=review_id)
-
-        if request.user != review.user:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        
-        review.delete()
-        data = {"delete": f"Review({review_id}) is deleted."}
-        return Response(data, status=status.HTTP_204_NO_CONTENT)
-
-
-
-class CommentListView(APIView):
-
-    def get(self, request, review_id):
-        comments = Comment.objects.filter(review_id=review_id)
-        serializer = CommentSerializer(comments, many=True)
-        return Response(serializer.data, status = status.HTTP_200_OK)
-
-
-    def post(self, request, review_id):
-        self.permission_classes = [IsAuthenticated]
-        self.check_permissions(request)
-        serializer = CommentSerializer(data=request.data)
-
-        if serializer.is_valid(raise_exception=True):
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-
-class CommentDetailView(APIView):
-
-    def put(self, request, review_id, comment_id):
-        self.permission_classes = [IsAuthenticated]
-        self.check_permissions(request)
-        comment = get_object_or_404(Comment, pk=comment_id)
-        serializer = CommentSerializer(comment, data=request.data, partial=True)
-
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-    def delete(self, request, review_id, comment_id):
-        self.permission_classes = [IsAuthenticated]
-        self.check_permissions(request)
-        comment = get_object_or_404(Comment, pk=comment_id)
-
-        if request.user != comment.user:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        
-        comment.delete()
-        data = {"delete": f"Comment({comment_id}) is deleted."}
-        return Response(data, status=status.HTTP_204_NO_CONTENT)
-
+class CommentDestroyAPIView(generics.DestroyAPIView):
+    queryset = CommentSerializer.get_optimized_queryset()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsAuthor]

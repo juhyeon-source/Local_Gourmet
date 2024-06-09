@@ -1,9 +1,24 @@
 from django.urls import path
-from . import views
+from .views import (
+    ReviewListAPIView,
+    ReviewCreateAPIView,
+    ReviewDetailAPIView,
+    ReviewUpdateAPIView,
+    ReviewDestroyAPIView,
+    CommentListAPIView,
+    CommentCreateAPIView,
+    CommentUpdateAPIView,
+    CommentDestroyAPIView
+)
 
 urlpatterns = [
-    path('', views.ReviewListView.as_view()),
-    path('<int:review_id>/', views.ReviewDetailView.as_view()),
-    path('<int:review_id>/comments/', views.CommentListView.as_view()),
-    path('<int:review_id>/comments/<int:comment_id>/', views.CommentDetailView.as_view()),
+    path('list/<int:pk>/', ReviewListAPIView.as_view(), name='review-list'),
+    path('create/', ReviewCreateAPIView.as_view(), name='review-create'),
+    path('<int:pk>/', ReviewDetailAPIView.as_view(), name='review-detail'),
+    path('<int:pk>/update/', ReviewUpdateAPIView.as_view(), name='review-update'),
+    path('<int:pk>/destroy/', ReviewDestroyAPIView.as_view(), name='review-destroy'),
+    path('<int:pk>/comments/', CommentListAPIView.as_view(), name='comment-list'),
+    path('<int:review_pk>/comment/', CommentCreateAPIView.as_view(), name='comment-create'),
+    path('comments/<int:pk>/update/', CommentUpdateAPIView.as_view(), name='comment-update'),
+    path('comments/<int:pk>/destroy/', CommentDestroyAPIView.as_view(), name='comment-destroy'),
 ]

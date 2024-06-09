@@ -1,6 +1,7 @@
 # Created by https://www.toptal.com/developers/gitignore/api/windows,macos,python,django,pycharm,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,macos,python,django,pycharm,visualstudiocode
 
+config.py
 ### Django ###
 *.log
 *.pot
@@ -416,6 +417,22 @@ pyrightconfig.json
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
+
+# Docker
+**/Dockerfile
+**/docker-compose.override.yml
+**/docker-compose.*.yml
+.dockerignore
+docker-compose.override.yml
+docker-compose.*.yml
+
+# Docker specific files
+docker-compose.override.yml
+.dockerignore
+Dockerfile
+postgres_data/
+
+
 
 # Local History for Visual Studio Code
 .history/
