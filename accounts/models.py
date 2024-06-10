@@ -3,9 +3,6 @@ from django.core.validators import RegexValidator
 from django.db import models
 from stores.models import Store
 
-# Create your models here.
-""" 회원 가입시 필요한 정보 """
-
 
 class Accounts(AbstractUser):
     class GenderChoices(models.TextChoices):
@@ -20,7 +17,7 @@ class Accounts(AbstractUser):
         default=GenderChoices.PRIVATE,  # 선택안함이 기본
     )
     address_si = models.CharField(max_length=50)
-    address_gu = models.CharField(max_length=30, default='default_value')
+    address_gu = models.CharField(max_length=30, default="default_value")
     address_detail = models.CharField(max_length=250)
 
     phone_number = models.CharField(
@@ -50,24 +47,24 @@ class Accounts(AbstractUser):
         db_table: str = "Accounts"
 
 
-
 class StoreAddress(models.Model):
     address_si = models.CharField(max_length=10)
     address_gu = models.CharField(max_length=10)
     address_detail = models.CharField(max_length=100)
 
     def __str__(self):
-        return f'{self.address_si} {self.address_gu} {self.address_detail}'
+        return f"{self.address_si} {self.address_gu} {self.address_detail}"
+
 
 class Bookmark(models.Model):
     user = models.ForeignKey(
         Accounts, on_delete=models.CASCADE, related_name="bookmarks"
     )
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
-    #user과 store 모두 1:N 이기 때문에 FK를 사용
+    # user과 store 모두 1:N 이기 때문에 FK를 사용
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ("user", "store")
-        #user와 store 사이에 중복이 발생 하면 안되기 때문에 unique_together 사용
+        # user와 store 사이에 중복이 발생 하면 안되기 때문에 unique_together 사용
