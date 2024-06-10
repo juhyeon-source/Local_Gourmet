@@ -58,7 +58,8 @@ jobs:
           sudo apt-get update
           sudo apt-get -y upgrade
           cd /home/ubuntu/Local_Gourmet
-          git pull origin dev
+          git switch main
+          git pull origin main
           pip install -r requirements.txt
           docker compose up -d
           python manage.py makemigrations
