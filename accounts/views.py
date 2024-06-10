@@ -3,6 +3,8 @@ import secrets
 import requests
 from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import check_password
+
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
@@ -17,6 +19,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import viewsets, status
 
 from local_gourmet import settings
+from reviews.models import Review, Comment
 
 # from allauth.socialaccount.providers.kakao import views as kakao_view
 
@@ -28,6 +31,8 @@ from .serializers import (
     BookmarkSerializer,
     UserSerializer,
     AccountsSerializer,
+    ReviewSerializer,
+    CommentSerializer,
 )
 
 User = get_user_model()
@@ -50,10 +55,19 @@ class UserDeleteAPIView(DestroyAPIView):
         return self.request.user
 
     def delete(self, request, *args, **kwargs):
-        response = super().delete(request, *args, **kwargs)
+        user = self.get_object()
+        password = request.data.get("password")
+
+        if not check_password(password, user.password):
+            return Response(
+                {"error": "비밀번호가 올바르지 않습니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.delete()
         return Response(
             {"message": "계정이 성공적으로 삭제되었습니다."},
-            status=response.status_code,
+            status=status.HTTP_204_NO_CONTENT,
         )
 
 
@@ -89,6 +103,89 @@ class AccountsDetailView(RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_update(self, serializer):
+        serializer.save()
+
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, *args, **kwargs):
+        user = request.user
+        data = request.data
+
+        current_password = data.get("current_password")
+        new_password = data.get("new_password")
+        new_password_check = data.get("new_password_check")
+
+        if not current_password or not new_password or not new_password_check:
+            return Response(
+                {"error": "모든 필수 정보를 입력해주세요."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if new_password != new_password_check:
+            return Response(
+                {"error": "새 비밀번호가 새 비밀번호 확인과 일치하지 않습니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not check_password(current_password, user.password):
+            return Response(
+                {"error": "현재 비밀번호가 올바르지 않습니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if new_password == current_password:
+            return Response(
+                {"error": "새 비밀번호는 현재 비밀번호와 달라야 합니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.set_password(new_password)
+        user.save()
+
+        return Response(
+            {"success": "비밀번호가 성공적으로 변경되었습니다."},
+            status=status.HTTP_200_OK,
+        )
+
+
+class BookmarkListView(ListAPIView):
+    serializer_class = BookmarkSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Bookmark.objects.filter(user=self.request.user)
+
+
+class UserReviewListView(ListAPIView):
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Review.objects.filter(user=self.request.user)
+
+
+class UserCommentListView(ListAPIView):
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Comment.objects.filter(user=self.request.user)
 
 
 # BASE_URL = f"{settings.BASE_URL}"
