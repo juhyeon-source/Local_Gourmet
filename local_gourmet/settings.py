@@ -61,12 +61,13 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.kakao",
     "allauth.socialaccount.providers.github",
+    'django_apscheduler',
     # local Apps
     "reviews",
     "accounts",
     "stores",
     "chatbots",
-    "scrappers",
+    'scrappers.apps.ScrappersConfig',
 ]
 
 AUTH_USER_MODEL = "accounts.Accounts"
@@ -185,6 +186,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Django apscheduler
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s"
+
+SCHEDULER_DEFAULT = True
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=720),
