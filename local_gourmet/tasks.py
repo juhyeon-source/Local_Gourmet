@@ -19,7 +19,7 @@ def scrape_recipes():
 def shutdown_scheduler():
     scheduler.shutdown()
 
-# 위와 완전히 같지만 정상작동하는지 테스트 해보기 위한 코드
+# # 위와 완전히 같지만 정상작동하는지 테스트 해보기 위한 코드
 # from apscheduler.schedulers.background import BackgroundScheduler
 # from apscheduler.triggers.interval import IntervalTrigger
 # import atexit

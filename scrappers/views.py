@@ -13,6 +13,14 @@ class RecipeScraperView(APIView):
         response = requests.get(url)
         soup = BeautifulSoup(response.content, "html.parser")
         recipes = soup.find("div", class_="container sub_bg").find_all("li")[6:]
+        
+        # 기존 DB 데이터 삭제
+        Recipe.objects.all().delete()
+        
+        # 'common_vod_label' 클래스 요소 제거, 제거 안하면 영상 썸네일의 플레이버튼이 나와버림.
+        for element in soup.find_all(class_="common_vod_label"):
+            element.decompose()
+        
         # 썸네일 이미지 자체를 추출
         for recipe in recipes:
             image_element = recipe.find("img")
@@ -51,4 +59,3 @@ class RecipeScraperView(APIView):
         if serializer.is_valid(raise_exception=True):
             serializer.save()  # 데이터베이스에 저장
         return Response(serializer.data, status=status.HTTP_200_OK)
-    # 뭐가 문제라고 이러냐
