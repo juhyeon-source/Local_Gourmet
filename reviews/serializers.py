@@ -53,29 +53,25 @@ class ReviewDetailSerializer(serializers.ModelSerializer):
     #     return Review.objects.all().only('store', 'score').select_related('store')
 
 class ReviewCreateSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model = Review
         fields = ['id', 'store', 'score', 'image', 'review_content']
         read_only_fields = ['id']
 
     def create(self, validated_data):
-        store_id = self.initial_data.get('store')
+        store_id = validated_data.pop('store').id
         user = self.context['request'].user
 
-        if not user.is_authenticated:
-            raise serializers.ValidationError('로그인한 유저여야 합니다.')
+        # if not user.is_authenticated:
+        #     raise serializers.ValidationError('로그인한 유저여야 합니다.')
 
-        store = Store.objects.filter(id=store_id).first()
+        store = Store.objects.get(id=store_id)
         if not store:
             raise serializers.ValidationError('존재하지 않는 스토어입니다.')
 
-        if user.address_gu != store.address.address_gu:
-            raise serializers.ValidationError('유저와 스토어의 동네가 같지 않습니다.')
+        # if user.address_gu != store.address.address_gu:
+        #     raise serializers.ValidationError('유저와 스토어의 동네가 같지 않습니다.')
 
-        # validated_data에서 store 필드를 제거
-        validated_data.pop('store', None)
-        
         review = Review.objects.create(user=user, store=store, **validated_data)
         return review
 
@@ -107,7 +103,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['id', 'username', 'comment_content','created_at', 'updated_at']
+        fields = ['id', 'username', 'comment_content']
         
     def get_username(self, obj):
         return obj.user.username

@@ -38,7 +38,6 @@ class ReviewCreateAPIView(generics.CreateAPIView):
     parser_classes = [MultiPartParser, FormParser]
 
 
-
 class ReviewDetailAPIView(generics.RetrieveAPIView):
     queryset = ReviewDetailSerializer.get_optimized_queryset()
     serializer_class = ReviewDetailSerializer
@@ -70,6 +69,10 @@ class CommentListAPIView(generics.ListAPIView):
     serializer_class = CommentSerializer
     pagination_class = Pagination
     permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        review_id = self.kwargs['pk']
+        return CommentSerializer.get_optimized_queryset().filter(review_id=review_id)
 
 
 class CommentCreateAPIView(generics.CreateAPIView):
