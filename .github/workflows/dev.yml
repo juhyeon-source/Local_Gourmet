@@ -1,10 +1,10 @@
-name: Main CI/CD
+name: Dev CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "dev" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "dev" ]
 
 jobs:
   ci:
@@ -41,27 +41,3 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test
-
-  cd:
-    name: 'django_CD'
-    needs: ci
-    runs-on: ubuntu-22.04
-      
-    steps:
-    - name: EC2 ssh connection test
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USERNAME }}
-        key: ${{ secrets.SSH_PEM }}
-        script: |
-          sudo apt-get update
-          sudo apt-get -y upgrade
-          cd /home/ubuntu/Local_Gourmet
-          git switch main
-          git pull origin main
-          pip install -r requirements.txt
-          docker compose up -d
-          python manage.py makemigrations
-          python manage.py migrate
-          sudo systemctl restart gunicorn

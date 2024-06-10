@@ -1,5 +1,0 @@
-export const kakaoLogIn = (code) => {
-    return axios
-        .post(`http://127.0.0.1:8000/api/v1/users/kakao`, { code })
-        .then((response) => response.status);
-};
