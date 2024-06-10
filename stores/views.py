@@ -53,8 +53,9 @@ class StoreImportAPIView(APIView):
                 category = row['category']
                 phone_number = row['phone_number']
                 address = row['address_id']
+                image = row['image']
                 store = Store(store_name=store_name, category=category, phone_number=phone_number,
-                            address_id=address)
+                              address_id=address, image=image)
                 stores.append(store)
             Store.objects.bulk_create(stores)
             return Response({'status': True, 'message': 'Storedata imported successfully'}, status=status.HTTP_200_OK)
