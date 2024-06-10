@@ -10,6 +10,8 @@ from rest_framework import generics
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
+from rest_framework.parsers import MultiPartParser, FormParser
+
 
 class Pagination(PageNumberPagination):
     page_size = 5
@@ -29,9 +31,11 @@ class ReviewListAPIView(generics.ListAPIView):
 
 
 class ReviewCreateAPIView(generics.CreateAPIView):
-    queryset = ReviewCreateSerializer.get_optimized_queryset()
+    # queryset = ReviewCreateSerializer.get_optimized_queryset()
+    queryset = Review.objects.all()
     serializer_class = ReviewCreateSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    parser_classes = [MultiPartParser, FormParser]
 
 
 class ReviewDetailAPIView(generics.RetrieveAPIView):
@@ -65,6 +69,10 @@ class CommentListAPIView(generics.ListAPIView):
     serializer_class = CommentSerializer
     pagination_class = Pagination
     permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        review_id = self.kwargs['pk']
+        return CommentSerializer.get_optimized_queryset().filter(review_id=review_id)
 
 
 class CommentCreateAPIView(generics.CreateAPIView):
