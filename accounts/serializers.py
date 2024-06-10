@@ -8,6 +8,7 @@ from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from accounts.models import Bookmark
+from reviews.models import Review, Comment
 
 User = get_user_model()
 
@@ -131,4 +132,20 @@ class AccountsSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["created_at", "updated_at"]
+        read_only_fields = ["username", "created_at", "updated_at"]
+
+    def validate(self, data):
+        data.pop("username", None)
+        return data
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ["id", "review_content", "created_at", "updated_at"]
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ["id", "comment_content", "created_at", "updated_at"]
