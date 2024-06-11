@@ -62,15 +62,15 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         store_id = validated_data.pop('store').id
         user = self.context['request'].user
 
-        # if not user.is_authenticated:
-        #     raise serializers.ValidationError('로그인한 유저여야 합니다.')
+        if not user.is_authenticated:
+            raise serializers.ValidationError('로그인한 유저여야 합니다.')
 
         store = Store.objects.get(id=store_id)
         if not store:
             raise serializers.ValidationError('존재하지 않는 스토어입니다.')
 
-        # if user.address_gu != store.address.address_gu:
-        #     raise serializers.ValidationError('유저와 스토어의 동네가 같지 않습니다.')
+        if user.address_gu != store.address.address_gu:
+            raise serializers.ValidationError('유저와 스토어의 동네가 같지 않습니다.')
 
         review = Review.objects.create(user=user, store=store, **validated_data)
         return review
