@@ -45,20 +45,34 @@ class StoreImportAPIView(APIView):
             serializer = self.serializer_class(data=data)
             if not serializer.is_valid():
                 return Response({'status': False, 'message': 'Provide a valid file'}, status=status.HTTP_400_BAD_REQUEST)
+
             excel_file = data.get('file')
             df = pd.read_excel(excel_file, sheet_name=0)
             stores = []
+
             for index, row in df.iterrows():
                 store_name = row['store_name']
                 category = row['category']
                 phone_number = row['phone_number']
-                address = row['address_id']
-                image = row['image']
-                store = Store(store_name=store_name, category=category, phone_number=phone_number,
-                              address_id=address, image=image)
+                address_id = row['address_id']
+                image_path = row['image']
+
+                # 이미지 경로가 NaN인 경우 빈 문자열로 대체
+                if pd.isna(image_path):
+                    image_path = ''
+
+                store = Store(
+                    store_name=store_name,
+                    category=category,
+                    phone_number=phone_number,
+                    address_id=address_id,
+                    image=image_path
+                )
                 stores.append(store)
+
             Store.objects.bulk_create(stores)
-            return Response({'status': True, 'message': 'Storedata imported successfully'}, status=status.HTTP_200_OK)
+            return Response({'status': True, 'message': 'Store data imported successfully'}, status=status.HTTP_200_OK)
+
         except Exception as e:
             return Response({'status': False, 'message': f'We could not complete the import process: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
