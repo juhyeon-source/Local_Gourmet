@@ -26,10 +26,14 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 # reading .env file
 environ.Env.read_env()
+BASE_URL = env("BASE_URL")
 SECRET_KEY = env("SECRET_KEY")
 OPENAI_API_KEY = env("OPENAI_API_KEY")
-KAKAO_REST_API_KEY = env('KAKAO_REST_API_KEY')
-SOCIAL_AUTH_GOOGLE_CLIENT_ID = env('SOCIAL_AUTH_GOOGLE_CLIENT_ID')
+KAKAO_REST_API_KEY = env("KAKAO_REST_API_KEY")
+SOCIAL_AUTH_GOOGLE_CLIENT_ID = env("SOCIAL_AUTH_GOOGLE_CLIENT_ID")
+SOCIAL_AUTH_GOOGLE_CLIENT_SECRET = env("SOCIAL_AUTH_GOOGLE_CLIENT_SECRET")
+
+
 # SECURITY WARNING: keep the secret key used in production secret!
 
 # SECURITY WARNING: don't run with debug turned on in production!

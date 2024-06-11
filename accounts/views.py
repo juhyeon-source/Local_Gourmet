@@ -188,10 +188,10 @@ class UserCommentListView(ListAPIView):
         return Comment.objects.filter(user=self.request.user)
 
 
+# TODO: 배포 후 redirect uri 변경 예정
+# 카카오, 구글의 redirect uri도 동일하게 변경 필요
 # BASE_URL = f"{settings.BASE_URL}"
-
-
-BASE_URL = "http://127.0.0.1:8000"  # 예시 BASE URL
+BASE_URL = "http://127.0.0.1:5500/user"
 STATE = secrets.token_urlsafe(16)
 
 
@@ -204,11 +204,11 @@ class SocialUrlView(APIView):
             )
         elif social == "kakao":
             url = (
-                "https://kauth.kakao.com/oauth/authorize?client_id="
-                + settings.KAKAO_REST_API_KEY
-                + "&redirect_uri="
-                + BASE_URL
-                + "&response_type=code&prompt=login"
+                    "https://kauth.kakao.com/oauth/authorize?client_id="
+                    + settings.KAKAO_REST_API_KEY
+                    + "&redirect_uri="
+                    + BASE_URL
+                    + "&response_type=code&prompt=login"
             )
             return Response({"url": url}, status=status.HTTP_200_OK)
         elif social == "google":
