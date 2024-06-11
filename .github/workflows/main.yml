@@ -58,6 +58,7 @@ jobs:
         script: |
           sudo apt-get update
           sudo apt-get -y upgrade
+          source venv/bin/activate
           cd /home/ubuntu/Local_Gourmet
           git switch main
           git pull origin main
