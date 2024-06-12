@@ -188,10 +188,8 @@ class UserCommentListView(ListAPIView):
         return Comment.objects.filter(user=self.request.user)
 
 
-# BASE_URL = f"{settings.BASE_URL}"
+BASE_URL = f"{settings.BASE_URL}"
 
-
-BASE_URL = "http://127.0.0.1:8000"  # 예시 BASE URL
 STATE = secrets.token_urlsafe(16)
 
 

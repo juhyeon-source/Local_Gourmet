@@ -30,6 +30,7 @@ SECRET_KEY = env("SECRET_KEY")
 OPENAI_API_KEY = env("OPENAI_API_KEY")
 KAKAO_REST_API_KEY = env('KAKAO_REST_API_KEY')
 SOCIAL_AUTH_GOOGLE_CLIENT_ID = env('SOCIAL_AUTH_GOOGLE_CLIENT_ID')
+BASE_URL = env('BASE_URL')
 # SECURITY WARNING: keep the secret key used in production secret!
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -37,8 +38,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     "3.38.191.229",
-    "localhost",
-    "127.0.0.1",
+    "www.sparta-local-gourmet.store",
+    "*.sparta-local-gourmet.store",
 ]
 
 # Application definition
@@ -60,11 +61,13 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.kakao",
     "allauth.socialaccount.providers.github",
+    'django_apscheduler',
     # local Apps
     "reviews",
     "accounts",
     "stores",
     "chatbots",
+    'scrappers.apps.ScrappersConfig',
 ]
 
 AUTH_USER_MODEL = "accounts.Accounts"
@@ -92,7 +95,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://127.0.0.1:3000"]
+# CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -128,15 +131,6 @@ DATABASES = {
         "PORT": env("DB_PORT"),
     }
 }
-# sqlite 사용하고 싶을 시 위 DATABASES 코드 주석처리 후, docker-compose down하고
-# 아래 코드 주석해제하고 마이그레이션 다시 한 후 사용할 것을 권장드립니다.
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#         }
-#     }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -183,6 +177,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Django apscheduler
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s"
+
+SCHEDULER_DEFAULT = True
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=720),

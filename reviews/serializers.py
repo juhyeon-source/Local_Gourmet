@@ -48,38 +48,33 @@ class ReviewDetailSerializer(serializers.ModelSerializer):
     def get_optimized_queryset():
         return Review.objects.all().only('store', 'user__username').select_related('store', 'user')
 
+    # @staticmethod
+    # def get_optimized_queryset():
+    #     return Review.objects.all().only('store', 'score').select_related('store')
 
 class ReviewCreateSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Review
         fields = ['id', 'store', 'score', 'image', 'review_content']
-        read_only_fields = ['id','store']
-
-    @staticmethod
-    def get_optimized_queryset():
-        return Review.objects.all().only('store', 'score').select_related('store')
+        read_only_fields = ['id']
 
     def create(self, validated_data):
-        store_name = self.initial_data.get('store')
-        request = self.context.get('request')
-        user = request.user
+        store_id = validated_data.pop('store').id
+        user = self.context['request'].user
 
-        # 유저가 존재하지 않는 경우
-        if not user:
+        if not user.is_authenticated:
             raise serializers.ValidationError('로그인한 유저여야 합니다.')
-        
-        # 스토어 이름으로 스토어 찾기
-        store = Store.objects.filter(store_name=store_name).first()
+
+        store = Store.objects.get(id=store_id)
         if not store:
             raise serializers.ValidationError('존재하지 않는 스토어입니다.')
-        
-        # 스토어의 address_gu와 user의 address_gu를 비교
+
         if user.address_gu != store.address.address_gu:
             raise serializers.ValidationError('유저와 스토어의 동네가 같지 않습니다.')
 
         review = Review.objects.create(user=user, store=store, **validated_data)
         return review
+
 
 # update와 partial_update의 차이는 'PUT' 요청과 'PATCH' 요청의 차이라고 생각할 수 있다.
 class ReviewUpdateSerializer(serializers.ModelSerializer):
@@ -108,7 +103,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['id', 'username', 'comment_content','created_at', 'updated_at']
+        fields = ['id', 'username', 'comment_content']
         
     def get_username(self, obj):
         return obj.user.username
