@@ -37,7 +37,8 @@ jobs:
         OPENAI_API_KEY='${{ secrets.OPENAI_API_KEY }}'
         KAKAO_REST_API_KEY='${{ secrets.KAKAO_REST_API_KEY }}'
         SOCIAL_AUTH_GOOGLE_CLIENT_ID='${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_ID }}'
-        SOCIAL_AUTH_GOOGLE_CLIENT_SECRET='${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_SECRET }}'" > .env
+        SOCIAL_AUTH_GOOGLE_CLIENT_SECRET='${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_SECRET }}'
+        BASE_URL='${{ secrets.BASE_URL }}'" > .env
         cat .env
     - name: Run Tests
       run: |
