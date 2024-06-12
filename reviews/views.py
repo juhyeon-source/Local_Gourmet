@@ -75,7 +75,7 @@ class CommentListAPIView(generics.ListAPIView):
         return CommentSerializer.get_optimized_queryset().filter(review_id=review_id)
 
 
-class CommentDetailAPIView(generics.ListAPIView):
+class CommentDetailAPIView(generics.RetrieveAPIView):
     queryset = CommentSerializer.get_optimized_queryset()
     serializer_class = CommentSerializer
     pagination_class = Pagination
