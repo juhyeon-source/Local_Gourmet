@@ -6,6 +6,7 @@ from openai import OpenAI
 
 from .bots import recipe_bot
 
+
 class ChatbotsAPIView(APIView):
     def post(self, request):
         user_message = request.data.get("message")
