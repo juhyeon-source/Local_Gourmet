@@ -39,6 +39,8 @@ ALLOWED_HOSTS = [
     "3.38.191.229",
     "localhost",
     "127.0.0.1",
+    "www.sparta-local-gourmet.store",
+    "*.sparta-local-gourmet.store",
 ]
 
 # Application definition

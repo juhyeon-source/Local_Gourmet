@@ -12,19 +12,21 @@ import pandas as pd
 class StoreListAPIView(APIView):
     def get(self, request):
         paginator = PageNumberPagination()
-        paginator.page_size = 500 # 페이지당 아이템 수를 설정
+        paginator.page_size = 500  # 페이지당 아이템 수를 설정
         stores = Store.objects.all()
-        
+
         # 검색 쿼리가 있는 경우에 대한 처리
         search_query = request.query_params.get('search', None)
         if search_query:
             stores = stores.filter(store_name__icontains=search_query)
             # 검색 쿼리가 있을 때는 페이지네이션을 적용하지 않음
-            serializer = StoreListSerializer(stores, many=True, context={'request': request})
+            serializer = StoreListSerializer(
+                stores, many=True, context={'request': request})
             return Response(serializer.data)
-        
+
         result_page = paginator.paginate_queryset(stores, request)
-        serializer = StoreListSerializer(result_page, many=True, context={'request': request})
+        serializer = StoreListSerializer(
+            result_page, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
 
@@ -45,20 +47,34 @@ class StoreImportAPIView(APIView):
             serializer = self.serializer_class(data=data)
             if not serializer.is_valid():
                 return Response({'status': False, 'message': 'Provide a valid file'}, status=status.HTTP_400_BAD_REQUEST)
+
             excel_file = data.get('file')
             df = pd.read_excel(excel_file, sheet_name=0)
             stores = []
+
             for index, row in df.iterrows():
                 store_name = row['store_name']
                 category = row['category']
                 phone_number = row['phone_number']
-                address = row['address_id']
-                image = row['image']
-                store = Store(store_name=store_name, category=category, phone_number=phone_number,
-                              address_id=address, image=image)
+                address_id = row['address_id']
+                image_path = row['image']
+
+                # 이미지 경로가 NaN인 경우 빈 문자열로 대체
+                if pd.isna(image_path):
+                    image_path = ''
+
+                store = Store(
+                    store_name=store_name,
+                    category=category,
+                    phone_number=phone_number,
+                    address_id=address_id,
+                    image=image_path
+                )
                 stores.append(store)
+
             Store.objects.bulk_create(stores)
-            return Response({'status': True, 'message': 'Storedata imported successfully'}, status=status.HTTP_200_OK)
+            return Response({'status': True, 'message': 'Store data imported successfully'}, status=status.HTTP_200_OK)
+
         except Exception as e:
             return Response({'status': False, 'message': f'We could not complete the import process: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 

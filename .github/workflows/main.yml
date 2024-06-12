@@ -36,7 +36,8 @@ jobs:
         DB_PORT='${{ secrets.DB_PORT }}'
         OPENAI_API_KEY='${{ secrets.OPENAI_API_KEY }}'
         KAKAO_REST_API_KEY='${{ secrets.KAKAO_REST_API_KEY }}'
-        SOCIAL_AUTH_GOOGLE_CLIENT_ID='${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_ID }}'" > .env
+        SOCIAL_AUTH_GOOGLE_CLIENT_ID='${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_ID }}'
+        SOCIAL_AUTH_GOOGLE_CLIENT_SECRET='${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_SECRET }}'" > .env
         cat .env
     - name: Run Tests
       run: |
@@ -57,6 +58,7 @@ jobs:
         script: |
           sudo apt-get update
           sudo apt-get -y upgrade
+          source venv/bin/activate
           cd /home/ubuntu/Local_Gourmet
           git switch main
           git pull origin main
