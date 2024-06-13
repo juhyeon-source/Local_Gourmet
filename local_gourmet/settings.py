@@ -41,6 +41,15 @@ ALLOWED_HOSTS = [
     "*.sparta-local-gourmet.store",
 ]
 
+SECURE_SSL_REDIRECT = False
+
+SECURE_HSTS_SECONDS = 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
+
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+
 # Application definition
 
 INSTALLED_APPS = [
