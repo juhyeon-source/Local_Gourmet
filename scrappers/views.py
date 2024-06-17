@@ -5,6 +5,17 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Recipe
 from .serializers import RecipeSerializer
+from django.http import HttpResponse
+
+class ExampleView(APIView):
+    def get(self, request):
+        data = {
+            'message': 'Hello from backend'
+        }
+        return Response(data, status=status.HTTP_200_OK)
+
+def health_check(request):
+    return HttpResponse(status=200)
 
 class RecipeScraperView(APIView):
     def get(self, request, format=None):
